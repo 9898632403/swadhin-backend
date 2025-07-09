@@ -1,0 +1,44 @@
+[
+  {
+    "country": "South Korea",
+    "style": "Soft Pastels",
+    "image": "/trends/korea.jpg",
+    "tip": "Match it with cute hair accessories and a mini sling bag!"
+  },
+  {
+    "country": "Italy",
+    "style": "Structured Blazers",
+    "image": "/trends/italy.jpg",
+    "tip": "Pair with neutral heels and a leather tote for boss vibes 💼✨"
+  },
+  {
+    "country": "India",
+    "style": "Layered Indo-Western",
+    "image": "/trends/india.jpg",
+    "tip": "Add a denim jacket over your kurti for the perfect fusion statement!"
+  },
+  {
+    "country": "Japan",
+    "style": "Monochrome Minimalism",
+    "image": "/trends/japan.jpg",
+    "tip": "Stick to black, white & grey — and go sleek on silhouettes ✨"
+  },
+  {
+    "country": "France",
+    "style": "Effortless Chic",
+    "image": "/trends/france.jpg",
+    "tip": "Tuck a white shirt into high-waist jeans with red lips 💋"
+  },
+  {
+    "country": "USA",
+    "style": "Street Sporty",
+    "image": "/trends/usa.jpg",
+    "tip": "Oversized hoodies + chunky sneakers = classic American cool 💥"
+  },
+  {
+    "country": "Dubai",
+    "style": "Glam Luxe",
+    "image": "/trends/dubai.jpg",
+    "tip": "Choose satin fabrics, gold accents & bold heels for that royal look 👑"
+  }
+]

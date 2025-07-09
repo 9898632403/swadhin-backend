@@ -1,0 +1,44 @@
+[
+  {
+    "name": "Floral Retro 🌸",
+    "tags": ["#Vintage", "#Romantic", "#SoftTones"],
+    "tip": "Try this with oxidised jhumkas!",
+    "image": "/trends/floral-retro.jpg"
+  },
+  {
+    "name": "Indo-Western Chill 💃",
+    "tags": ["#Fusion", "#ComfortWear", "#LayeredLook"],
+    "tip": "Layer a denim jacket over a kurti for a cool fusion vibe!",
+    "image": "/trends/indo-western.jpg"
+  },
+  {
+    "name": "Parisian Light Luxe 💋☁️",
+    "tags": ["#Minimalist", "#NeutralPalette", "#Effortless"],
+    "tip": "Pair white blouses with beige trousers & flats!",
+    "image": "/trends/parisian-light.jpg"
+  },
+  {
+    "name": "Boho Bloom 🌿🌼",
+    "tags": ["#FreeSpirit", "#PrintedLayers", "#BohemianVibes"],
+    "tip": "Style maxi skirts with fringe bags & chunky jewellery!",
+    "image": "/trends/boho-bloom.jpg"
+  },
+  {
+    "name": "Street Pop 🔥🎧",
+    "tags": ["#BoldColors", "#Oversized", "#StreetStyle"],
+    "tip": "Go with baggy pants + neon hoodie + chunky sneakers.",
+    "image": "/trends/street-pop.jpg"
+  },
+  {
+    "name": "Cozy Monsoon Mood ☔🧥",
+    "tags": ["#LayerUp", "#CuteRainwear", "#MutedTones"],
+    "tip": "Match pastel hoodies with high-ankle boots this rainy szn!",
+    "image": "/trends/monsoon-mood.jpg"
+  },
+  {
+    "name": "Desi Glam Night ✨🕌",
+    "tags": ["#SareeNotSorry", "#EthnicGlam", "#NightGlow"],
+    "tip": "Drape a shimmer saree with smoky eyes for a wedding guest vibe!",
+    "image": "/trends/desi-glam.jpg"
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Color Combination Chart",
+    "icon": "🎨",
+    "link": "/resources/colors.pdf"
+  },
+  {
+    "title": "Body Shape Styling Guide",
+    "icon": "👗",
+    "link": "/resources/body-guide.pdf"
+  },
+  {
+    "title": "Fabric Glossary",
+    "icon": "🧵",
+    "link": "/resources/fabrics.pdf"
+  },
+  {
+    "title": "Monthly Lookbook",
+    "icon": "📚",
+    "link": "/resources/lookbook.pdf"
+  }
+]

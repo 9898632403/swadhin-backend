@@ -1,0 +1,4 @@
+Context: [{'question': 'What kind of fashion help do you need today?', 'answer': 'Party Look'}, {'question': 'What type of party are you dressing for?', 'answer': 'Wedding'}, {'question': 'Which element do you want to highlight?', 'answer': 'Color'}, {'question': 'Choose your preferred color tone:', 'answer': 'Cool Tones (blue, silver)'}]
+Input: you can improvee more colurs 
+
+

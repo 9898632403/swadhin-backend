@@ -1,0 +1,462 @@
+{
+  "start": {
+    "question": "Hello! What occasion are you dressing up for today?",
+    "options": {
+      "Party / Night Out": "party_look",
+      "College / School": "college_look",
+      "Office / Formal": "office_look",
+      "Wedding / Engagement": "wedding_look",
+      "Festival / Cultural": "festival_look",
+      "Vacation / Travel": "vacation_look",
+      "Casual Outing": "casual_look",
+      "Family Function": "family_look",
+      "Date / Romantic": "date_look",
+      "Photoshoot / Influencer": "photoshoot_look",
+      "Gym / Sports": "gym_look",
+      "Other": "other_look"
+    }
+  },
+
+  "party_look": {
+    "question": "Choose your preferred style for party:",
+    "options": {
+      "Western": "party_western",
+      "Indian": "party_indian",
+      "Fusion": "party_fusion"
+    }
+  },
+
+  "party_western": {
+    "question": "Which western outfit do you like?",
+    "options": {
+      "Dress / Gown": "party_western_dress",
+      "Jeans & Top": "party_western_jeans",
+      "Skirt & Crop Top": "party_western_skirt",
+      "Jumpsuit / Romper": "party_western_jumpsuit",
+      "Blazer & Pants": "party_western_blazer"
+    }
+  },
+
+  "party_western_dress": {
+    "question": "Pick a color palette:",
+    "options": {
+      "Bright": "color_bright",
+      "Pastel": "color_pastel",
+      "Metallic / Glitter": "color_metallic",
+      "Dark / Moody": "color_dark",
+      "Monochrome": "color_mono"
+    }
+  },
+
+  "color_bright": {
+    "question": "Which season is it?",
+    "options": {
+      "Summer": "fabric_light",
+      "Winter": "fabric_warm",
+      "Spring / Fall": "fabric_medium",
+      "Monsoon": "fabric_rainproof"
+    }
+  },
+
+  "fabric_light": {
+    "question": "Preferred fabric type?",
+    "options": {
+      "Cotton": "accessories_party",
+      "Linen": "accessories_party",
+      "Chiffon": "accessories_party",
+      "Silk": "accessories_party",
+      "Polyester": "accessories_party"
+    }
+  },
+
+  "fabric_warm": {
+    "question": "Preferred warm fabric?",
+    "options": {
+      "Velvet": "accessories_party",
+      "Wool Blend": "accessories_party",
+      "Satin": "accessories_party",
+      "Leather": "accessories_party"
+    }
+  },
+
+  "accessories_party": {
+    "question": "Pick your accessories:",
+    "options": {
+      "High Heels": "shoes_party",
+      "Flats": "shoes_party",
+      "Clutch Bag": "final_suggestion",
+      "Statement Jewelry": "final_suggestion",
+      "Minimal Jewelry": "final_suggestion"
+    }
+  },
+
+  "shoes_party": {
+    "question": "Choose shoe type:",
+    "options": {
+      "Stilettos": "final_suggestion",
+      "Block Heels": "final_suggestion",
+      "Sneakers": "final_suggestion",
+      "Boots": "final_suggestion"
+    }
+  },
+
+  "final_suggestion": {
+    "question": "Thanks for your answers! Please explain your style or any specific needs:",
+    "input": true,
+    "store_in_db": true
+  },
+
+  "party_western_jeans": {
+    "question": "Jeans style preference?",
+    "options": {
+      "Skinny": "final_suggestion",
+      "Mom Jeans": "final_suggestion",
+      "Flared": "final_suggestion",
+      "Distressed": "final_suggestion"
+    }
+  },
+
+  "party_western_skirt": {
+    "question": "Skirt type?",
+    "options": {
+      "Mini": "final_suggestion",
+      "Midi": "final_suggestion",
+      "Maxi": "final_suggestion",
+      "Pleated": "final_suggestion"
+    }
+  },
+
+  "party_western_jumpsuit": {
+    "question": "Jumpsuit style?",
+    "options": {
+      "Sleeveless": "final_suggestion",
+      "Full Sleeves": "final_suggestion",
+      "Off Shoulder": "final_suggestion"
+    }
+  },
+
+  "party_western_blazer": {
+    "question": "Blazer fit?",
+    "options": {
+      "Oversized": "final_suggestion",
+      "Tailored": "final_suggestion",
+      "Double Breasted": "final_suggestion"
+    }
+  },
+
+  "party_indian": {
+    "question": "Indian party outfit preference?",
+    "options": {
+      "Saree": "party_indian_saree",
+      "Lehenga": "party_indian_lehenga",
+      "Anarkali": "party_indian_anarkali",
+      "Salwar Kameez": "party_indian_salwar"
+    }
+  },
+
+  "party_indian_saree": {
+    "question": "Saree fabric?",
+    "options": {
+      "Silk": "final_suggestion",
+      "Chiffon": "final_suggestion",
+      "Georgette": "final_suggestion",
+      "Cotton": "final_suggestion"
+    }
+  },
+
+  "party_indian_lehenga": {
+    "question": "Lehenga style?",
+    "options": {
+      "Heavy Embroidered": "final_suggestion",
+      "Light Embellished": "final_suggestion",
+      "Mirror Work": "final_suggestion",
+      "Net": "final_suggestion"
+    }
+  },
+
+  "party_indian_anarkali": {
+    "question": "Anarkali length?",
+    "options": {
+      "Floor Length": "final_suggestion",
+      "Knee Length": "final_suggestion"
+    }
+  },
+
+  "party_indian_salwar": {
+    "question": "Salwar style?",
+    "options": {
+      "Patiala": "final_suggestion",
+      "Churidar": "final_suggestion",
+      "Straight Pants": "final_suggestion"
+    }
+  },
+
+  "party_fusion": {
+    "question": "Fusion outfit type?",
+    "options": {
+      "Indo-Western Gown": "final_suggestion",
+      "Dhoti Pants & Top": "final_suggestion",
+      "Kurti & Skirt": "final_suggestion",
+      "Jumpsuit with Dupatta": "final_suggestion"
+    }
+  },
+
+  "college_look": {
+    "question": "College outfit type?",
+    "options": {
+      "Casual Everyday": "college_casual",
+      "Smart Casual": "college_smart",
+      "Festive": "college_festive"
+    }
+  },
+
+  "college_casual": {
+    "question": "Casual outfit?",
+    "options": {
+      "Jeans & T-Shirt": "final_suggestion",
+      "Shorts & Top": "final_suggestion",
+      "Skirt & Top": "final_suggestion"
+    }
+  },
+
+  "college_smart": {
+    "question": "Smart casual outfit?",
+    "options": {
+      "Shirt & Trousers": "final_suggestion",
+      "Dress / Skirt": "final_suggestion",
+      "Blazer & Jeans": "final_suggestion"
+    }
+  },
+
+  "college_festive": {
+    "question": "Festival outfit?",
+    "options": {
+      "Traditional Indian": "final_suggestion",
+      "Western": "final_suggestion",
+      "Fusion": "final_suggestion"
+    }
+  },
+
+  "office_look": {
+    "question": "Office outfit style?",
+    "options": {
+      "Formal Suit": "office_formal_suit",
+      "Business Casual": "office_business_casual",
+      "Ethnic Wear": "office_ethnic"
+    }
+  },
+
+  "office_formal_suit": {
+    "question": "Suit color preference?",
+    "options": {
+      "Navy Blue": "final_suggestion",
+      "Black": "final_suggestion",
+      "Grey": "final_suggestion",
+      "Beige": "final_suggestion"
+    }
+  },
+
+  "office_business_casual": {
+    "question": "Business casual outfit?",
+    "options": {
+      "Shirt & Chinos": "final_suggestion",
+      "Knitwear & Trousers": "final_suggestion",
+      "Dress": "final_suggestion"
+    }
+  },
+
+  "office_ethnic": {
+    "question": "Ethnic office wear?",
+    "options": {
+      "Kurti & Pants": "final_suggestion",
+      "Saree": "final_suggestion",
+      "Salwar Kameez": "final_suggestion"
+    }
+  },
+
+  "wedding_look": {
+    "question": "Wedding outfit type?",
+    "options": {
+      "Traditional Indian": "wedding_traditional",
+      "Western Formal": "wedding_western",
+      "Fusion": "wedding_fusion"
+    }
+  },
+
+  "wedding_traditional": {
+    "question": "Traditional wedding outfit?",
+    "options": {
+      "Bridal Lehenga": "final_suggestion",
+      "Sherwani / Kurta": "final_suggestion",
+      "Saree": "final_suggestion"
+    }
+  },
+
+  "wedding_western": {
+    "question": "Western wedding outfit?",
+    "options": {
+      "Evening Gown": "final_suggestion",
+      "Tuxedo": "final_suggestion"
+    }
+  },
+
+  "wedding_fusion": {
+    "question": "Fusion wedding outfit?",
+    "options": {
+      "Indo-Western Gown": "final_suggestion",
+      "Suit with Indian Accessories": "final_suggestion"
+    }
+  },
+
+  "festival_look": {
+    "question": "Festival you are dressing for?",
+    "options": {
+      "Diwali": "festival_diwali",
+      "Eid": "festival_eid",
+      "Christmas": "festival_christmas",
+      "Holi": "festival_holi",
+      "Navratri": "festival_navratri",
+      "Other": "festival_other"
+    }
+  },
+
+  "festival_diwali": {
+    "question": "Preferred Diwali outfit?",
+    "options": {
+      "Traditional Saree": "final_suggestion",
+      "Anarkali Suit": "final_suggestion",
+      "Lehenga": "final_suggestion",
+      "Western Party Dress": "final_suggestion"
+    }
+  },
+
+  "festival_eid": {
+    "question": "Preferred Eid outfit?",
+    "options": {
+      "Abaya": "final_suggestion",
+      "Kurta Pajama": "final_suggestion",
+      "Salwar Kameez": "final_suggestion"
+    }
+  },
+
+  "festival_christmas": {
+    "question": "Christmas outfit style?",
+    "options": {
+      "Casual Sweater": "final_suggestion",
+      "Party Dress": "final_suggestion",
+      "Formal Wear": "final_suggestion"
+    }
+  },
+
+  "festival_holi": {
+    "question": "Holi outfit color preference?",
+    "options": {
+      "White": "final_suggestion",
+      "Bright Colors": "final_suggestion",
+      "Pastels": "final_suggestion"
+    }
+  },
+
+  "festival_navratri": {
+    "question": "Navratri outfit?",
+    "options": {
+      "Ghagra Choli": "final_suggestion",
+      "Kurti & Palazzo": "final_suggestion"
+    }
+  },
+
+  "vacation_look": {
+    "question": "Vacation type?",
+    "options": {
+      "Beach": "vacation_beach",
+      "Hill Station": "vacation_hill",
+      "City Tour": "vacation_city",
+      "Cruise": "vacation_cruise"
+    }
+  },
+
+  "vacation_beach": {
+    "question": "Beachwear?",
+    "options": {
+      "Swimsuit / Bikini": "final_suggestion",
+      "Cover-Up Dress": "final_suggestion",
+      "Shorts & Tank Top": "final_suggestion"
+    }
+  },
+
+  "vacation_hill": {
+    "question": "Hill station wear?",
+    "options": {
+      "Jacket & Jeans": "final_suggestion",
+      "Sweater & Leggings": "final_suggestion",
+      "Layered Outfit": "final_suggestion"
+    }
+  },
+
+  "vacation_city": {
+    "question": "City tour outfit?",
+    "options": {
+      "Comfortable Dress": "final_suggestion",
+      "Casual Pants & Shirt": "final_suggestion"
+    }
+  },
+
+  "vacation_cruise": {
+    "question": "Cruise outfit?",
+    "options": {
+      "Formal Dress": "final_suggestion",
+      "Casual Summer Dress": "final_suggestion"
+    }
+  },
+
+  "casual_look": {
+    "question": "Casual outfit?",
+    "options": {
+      "Jeans & T-Shirt": "final_suggestion",
+      "Sweatpants & Hoodie": "final_suggestion",
+      "Casual Dress": "final_suggestion"
+    }
+  },
+
+  "family_look": {
+    "question": "Family function outfit?",
+    "options": {
+      "Traditional Indian": "final_suggestion",
+      "Western Formal": "final_suggestion",
+      "Fusion": "final_suggestion"
+    }
+  },
+
+  "date_look": {
+    "question": "Date outfit style?",
+    "options": {
+      "Romantic Dress": "final_suggestion",
+      "Casual Chic": "final_suggestion",
+      "Smart Casual": "final_suggestion"
+    }
+  },
+
+  "photoshoot_look": {
+    "question": "Photoshoot theme?",
+    "options": {
+      "Fashion Editorial": "final_suggestion",
+      "Casual Lifestyle": "final_suggestion",
+      "Glamour": "final_suggestion"
+    }
+  },
+
+  "gym_look": {
+    "question": "Gym outfit?",
+    "options": {
+      "Leggings & Sports Bra": "final_suggestion",
+      "Shorts & Tank": "final_suggestion",
+      "Tracksuit": "final_suggestion"
+    }
+  },
+
+  "other_look": {
+    "question": "Please specify your occasion or style needs:",
+    "input": true,
+    "store_in_db": true
+  }
+}
