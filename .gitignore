@@ -1,9 +1,19 @@
+# Ignore virtual environments
+venv/
 env/
+testenv/
+
+# Python cache files
 __pycache__/
 *.pyc
+
+# Uploaded files & media
 uploads/
 *.pdf
 *.jpg
 *.jpeg
 *.png
 *.mp4
+
+# Env files
+.env
