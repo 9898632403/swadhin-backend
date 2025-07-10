@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import random
 import bcrypt
 import jwt
-import torch
+# import torch
 import razorpay
 import mimetypes
 import time
@@ -29,10 +29,15 @@ from email.message import EmailMessage
 # Load environment variables
 load_dotenv()
 
-# Razorpay client
-razorpay_client = razorpay.Client(
-    auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET"))
-)
+# # Razorpay client
+# razorpay_client = razorpay.Client(
+#     auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET"))
+# )
+def get_razorpay_client():
+    return razorpay.Client(
+        auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET"))
+    )
+
 
 # OTP store with expiry
 otp_store = {}  # { email: { otp: "123456", expiry: 1710000000 } }
@@ -41,11 +46,20 @@ otp_store = {}  # { email: { otp: "123456", expiry: 1710000000 } }
 style_data = {}
 categories = ['men', 'women', 'boys', 'girls', 'kids']
 
-for cat in categories:
-    file_path = os.path.join('app', 'style_data', f'{cat}.json')
-    if os.path.exists(file_path):
-        with open(file_path, 'r', encoding='utf-8') as f:
-            style_data[cat] = json.load(f)
+# for cat in categories:
+#     file_path = os.path.join('app', 'style_data', f'{cat}.json')
+#     if os.path.exists(file_path):
+#         with open(file_path, 'r', encoding='utf-8') as f:
+#             style_data[cat] = json.load(f)
+def load_style_data():
+    style_data = {}
+    categories = ['men', 'women', 'boys', 'girls', 'kids']
+    for cat in categories:
+        file_path = os.path.join('app', 'style_data', f'{cat}.json')
+        if os.path.exists(file_path):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                style_data[cat] = json.load(f)
+    return style_data
 
 
 
@@ -55,7 +69,7 @@ app = Flask(__name__)
 # ✅ CORS Setup
 CORS(
     app,
-    origins=["http://localhost:5173", "http://127.0.0.1:5173" , "http://<your-ip>:5173"],
+    origins=["http://localhost:5173", "http://127.0.0.1:5173" , "http://<your-ip>:5173","https://swadhin-frontend-ebx6.vercel.app","https://swadhin-frontend-ebx6-git-main-9898632403s-projects.vercel.app","https://swadhin-frontend-ebx6-b92r65qxk-9898632403s-projects.vercel.app","https://48c36779a925.ngrok-free.app"],
     methods=["GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH"],
     allow_headers=["Content-Type", "Authorization", "X-User-Email"],
     supports_credentials=True  # important if cookies or auth headers involved
@@ -84,7 +98,7 @@ def serve_uploaded_file(filename):
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 client = MongoClient(MONGO_URI)
 db = client["swadhinDB"]
-db.testimonials.update_many({}, { "$set": { "visible": True } })
+# db.testimonials.update_many({}, { "$set": { "visible": True } })
 
 # 📦 Collections
 users_col = db['users']
@@ -261,6 +275,7 @@ def upload_gallery_file():
     os.makedirs(upload_folder, exist_ok=True)
     upload_path = os.path.join(upload_folder, filename)
     file.save(upload_path)
+    db.testimonials.update_many({}, { "$set": { "visible": True } })
 
     return jsonify({
         "fileUrl": f"http://localhost:5000/static/uploads/gallery/{filename}"
@@ -2007,5 +2022,5 @@ def mark_coupons_seen():
 # Run App
 if __name__ == "__main__":
     # app.run(debug=True)
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    # app.run()
