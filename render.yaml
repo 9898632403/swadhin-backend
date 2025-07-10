@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: swadhin-backend
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn run:app"
+    pythonVersion: 3.11
