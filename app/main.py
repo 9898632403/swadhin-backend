@@ -66,13 +66,17 @@ def load_style_data():
 
 app = Flask(__name__)
 
-# ✅ CORS Setup
+# ✅ Final CORS setup for both local + Vercel frontend
 CORS(
     app,
-    origins=["http://localhost:5173", "http://127.0.0.1:5173" , "http://<your-ip>:5173","https://swadhin-frontend-ebx6.vercel.app","https://swadhin-frontend-ebx6-git-main-9898632403s-projects.vercel.app","https://swadhin-frontend-ebx6-b92r65qxk-9898632403s-projects.vercel.app","https://48c36779a925.ngrok-free.app"],
+    resources={r"/api/*": {"origins": [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://swadhin-frontend-git-main-9898632403s-projects.vercel.app"
+    ]}},
     methods=["GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH"],
     allow_headers=["Content-Type", "Authorization", "X-User-Email"],
-    supports_credentials=True  # important if cookies or auth headers involved
+    supports_credentials=True
 )
 
 
@@ -653,55 +657,55 @@ def delete_user():
 
 
 #these routes for trend anlysis thats not work 
-@app.route('/api/trends/daily', methods=['GET'])
-def get_daily_trends():
-    data = load_json('daily_trends.json')
-    return jsonify(data)
+# @app.route('/api/trends/daily', methods=['GET'])
+# def get_daily_trends():
+#     data = load_json('daily_trends.json')
+#     return jsonify(data)
 
-@app.route('/api/trends/mixmatch', methods=['GET'])
-def get_mix_match():
-    data = load_json('mix_match.json')
-    return jsonify(data)
+# @app.route('/api/trends/mixmatch', methods=['GET'])
+# def get_mix_match():
+#     data = load_json('mix_match.json')
+#     return jsonify(data)
 
-@app.route('/api/trends/global', methods=['GET'])
-def get_global_trends():
-    data = load_json('global_trends.json')
-    return jsonify(data)
+# @app.route('/api/trends/global', methods=['GET'])
+# def get_global_trends():
+#     data = load_json('global_trends.json')
+#     return jsonify(data)
 
-@app.route('/api/trends/toolkit', methods=['GET'])
-def get_toolkit():
-    data = load_json('toolkit.json')
-    return jsonify(data)
+# @app.route('/api/trends/toolkit', methods=['GET'])
+# def get_toolkit():
+#     data = load_json('toolkit.json')
+#     return jsonify(data)
 
 
 #stylesuggestiionnnnnnnn
 
-@app.route('/api/style/questions/<category>', methods=['GET'])
-def get_style_questions(category):
-    if category not in style_data:
-        return jsonify({'error': 'Invalid category'}), 400
+# @app.route('/api/style/questions/<category>', methods=['GET'])
+# def get_style_questions(category):
+#     if category not in style_data:
+#         return jsonify({'error': 'Invalid category'}), 400
 
-    questions = style_data[category]
-    random.shuffle(questions)
-    return jsonify(questions[:4])  # Send 4 random questions
+#     questions = style_data[category]
+#     random.shuffle(questions)
+#     return jsonify(questions[:4])  # Send 4 random questions
 
 
 
-@app.route('/api/style/answers', methods=['POST'])
-def get_style_answers():
-    data = request.get_json()
-    category = data.get('category')
-    question = data.get('question')
+# @app.route('/api/style/answers', methods=['POST'])
+# def get_style_answers():
+#     data = request.get_json()
+#     category = data.get('category')
+#     question = data.get('question')
 
-    if not category or not question:
-        return jsonify({'error': 'Missing fields'}), 400
+#     if not category or not question:
+#         return jsonify({'error': 'Missing fields'}), 400
 
-    question_set = next((q for q in style_data.get(category, []) if q["question"] == question), None)
-    if not question_set:
-        return jsonify({'error': 'Question not found'}), 404
+#     question_set = next((q for q in style_data.get(category, []) if q["question"] == question), None)
+#     if not question_set:
+#         return jsonify({'error': 'Question not found'}), 404
 
-    random.shuffle(question_set["answers"])
-    return jsonify({'answers': question_set["answers"][:3]})
+#     random.shuffle(question_set["answers"])
+#     return jsonify({'answers': question_set["answers"][:3]})
 
 ##contect form for cancel , exchnage , genralizationn............................................
 @app.route('/api/contact', methods=['POST'])
@@ -793,31 +797,31 @@ Message: {message}
         print("Contact error:", str(e))
         return jsonify({'error': 'Failed to submit. Try again later.'}), 500
 
-#part of aisection style suggesion .............................................
-@app.route('/api/style/save', methods=['POST'])
-def save_style_response():
-    data = request.get_json()
-    db.user_style_feedback.insert_one({
-        "userId": data.get("userId", None),
-        "category": data.get("category"),
-        "question": data.get("question"),
-        "answer": data.get("answer"),
-        "timestamp": datetime.datetime.utcnow()
-    })
+# #part of aisection style suggesion .............................................
+# @app.route('/api/style/save', methods=['POST'])
+# def save_style_response():
+#     data = request.get_json()
+#     db.user_style_feedback.insert_one({
+#         "userId": data.get("userId", None),
+#         "category": data.get("category"),
+#         "question": data.get("question"),
+#         "answer": data.get("answer"),
+#         "timestamp": datetime.datetime.utcnow()
+#     })
     return jsonify({'message': 'Saved successfully'})
    
-@app.route('/api/ai/style-suggestion', methods=['POST'])
-def style_suggestion():
-    data = request.json
-    prompt = data.get('prompt')
-    if not prompt:
-        return jsonify({'error': 'Prompt is required'}), 400
-    try:
-        from generate_text import generate_fashion_text
-        suggestion = generate_fashion_text(prompt, max_length=100)
-        return jsonify({'suggestion': suggestion})
-    except Exception as e:
-        return jsonify({'error': f"Generation error: {str(e)}"}), 500
+# @app.route('/api/ai/style-suggestion', methods=['POST'])
+# def style_suggestion():
+#     data = request.json
+#     prompt = data.get('prompt')
+#     if not prompt:
+#         return jsonify({'error': 'Prompt is required'}), 400
+#     try:
+#         from generate_text import generate_fashion_text
+#         suggestion = generate_fashion_text(prompt, max_length=100)
+#         return jsonify({'suggestion': suggestion})
+#     except Exception as e:
+#         return jsonify({'error': f"Generation error: {str(e)}"}), 500
 #products based routes ...................................................................
 
 
@@ -980,22 +984,22 @@ def upload_image():
         return jsonify({'error': f'Failed to save image: {str(e)}'}), 500
 
 # Chatbot Flow
-chatbot_flow = {
-    "start": {
-        "question": "What kind of fashion help do you need today?",
-        "options": {
-            "Party Look": "party_look",
-            "College Outfit": "college_look",
-            "Ethnic Wear": "ethnic_wear",
-            "Seasonal Styling": "seasonal_style"
-        }
-    },
-    "final_suggestion": {
-        "question": "Tell us more about your preferences or any specific outfit idea you have in mind!",
-        "input": True,
-        "store_in_db": True
-    }
-}
+# chatbot_flow = {
+#     "start": {
+#         "question": "What kind of fashion help do you need today?",
+#         "options": {
+#             "Party Look": "party_look",
+#             "College Outfit": "college_look",
+#             "Ethnic Wear": "ethnic_wear",
+#             "Seasonal Styling": "seasonal_style"
+#         }
+#     },
+#     "final_suggestion": {
+#         "question": "Tell us more about your preferences or any specific outfit idea you have in mind!",
+#         "input": True,
+#         "store_in_db": True
+#     }
+# }
 
 
 #order relateddd ALL routes
@@ -1189,26 +1193,26 @@ def update_order_status(order_id):
 
 
 
-@app.route('/api/style-quiz', methods=['POST'])
-def save_style_quiz():
-    try:
-        data = request.get_json()
-        user_email = data.get('email')
-        answers = data.get('answers')
+# @app.route('/api/style-quiz', methods=['POST'])
+# def save_style_quiz():
+#     try:
+#         data = request.get_json()
+#         user_email = data.get('email')
+#         answers = data.get('answers')
 
-        if not user_email or not answers:
-            return jsonify({'error': 'Missing data'}), 400
+#         if not user_email or not answers:
+#             return jsonify({'error': 'Missing data'}), 400
 
-        style_quiz_doc = {
-            'email': user_email,
-            'answers': answers,
-            'timestamp': datetime.datetime.utcnow()
-        }
+#         style_quiz_doc = {
+#             'email': user_email,
+#             'answers': answers,
+#             'timestamp': datetime.datetime.utcnow()
+#         }
 
-        db.style_quiz_answers.insert_one(style_quiz_doc)
-        return jsonify({'message': 'Quiz answers saved successfully!'}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500  # ✅ FIX: Better error reporting
+#         db.style_quiz_answers.insert_one(style_quiz_doc)
+#         return jsonify({'message': 'Quiz answers saved successfully!'}), 200
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500  # ✅ FIX: Better error reporting
 
 @app.route('/api/orders/<email>', methods=['GET'])
 def get_orders(email):
