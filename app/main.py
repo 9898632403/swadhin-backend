@@ -366,7 +366,6 @@ def delete_gallery_tile(tile_id):
         return jsonify({"error": str(e)}), 500
   
 #milestone relted routes...................................................................
-# 🔐 Add new testimonial
 @app.route('/admin/testimonial', methods=['POST', 'OPTIONS'])
 @cross_origin(supports_credentials=True, origins=["http://localhost:5173"])
 def add_testimonial():
@@ -386,18 +385,13 @@ def add_testimonial():
         if field not in data or not str(data[field]).strip():
             return jsonify({"error": f"{field} is required"}), 400
 
-    src = data.get('src', '').strip()
-    if src and not src.startswith("http"):
-        host = request.host_url.rstrip('/')
-        src = f"{host}/{src.lstrip('/')}"
-
     new_testimonial = {
         "quote": data['quote'].strip(),
         "author": data['author'].strip(),
         "location": data.get('location', '').strip(),
         "caption": data.get('caption', '').strip(),
         "type": data.get('type', 'image').strip(),  # image or video
-        "src": src,
+        "src": data.get('src', '').strip(),         # optional media
         "visible": data.get('visible', True),
         "created_at": datetime.utcnow()
     }
@@ -409,7 +403,7 @@ def add_testimonial():
         return jsonify({"error": str(e)}), 500
 
 
-# 🔐 Admin: Get all testimonials
+# 🔐 Get all testimonials (admin)
 @app.route('/admin/testimonial', methods=['GET'])
 @cross_origin(supports_credentials=True, origins=["http://localhost:5173"])
 def get_all_testimonials():
@@ -426,7 +420,7 @@ def get_all_testimonials():
         return jsonify({"error": str(e)}), 500
 
 
-# 🔐 Admin: Delete testimonial
+# 🔐 Delete testimonial by ID (admin)
 @app.route('/admin/testimonial/<string:testimonial_id>', methods=['DELETE'])
 @cross_origin(supports_credentials=True, origins=["http://localhost:5173"])
 def delete_testimonial(testimonial_id):
@@ -454,7 +448,6 @@ def get_visible_testimonials():
         return jsonify({"testimonials": testimonials}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 # 🛠️ Utility Functions.......................................................................
 def load_json(filename):
     with open(f'data/{filename}', 'r', encoding='utf-8') as file:
@@ -825,7 +818,7 @@ Message: {message}
 #         "answer": data.get("answer"),
 #         "timestamp": datetime.datetime.utcnow()
 #     })
-    # return jsonify({'message': 'Saved successfully'})
+    return jsonify({'message': 'Saved successfully'})
    
 # @app.route('/api/ai/style-suggestion', methods=['POST'])
 # def style_suggestion():
@@ -1476,7 +1469,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # ✅ POST: Upload Lookbook Post (CORS fix)
 @app.route('/api/lookbook', methods=['POST', 'OPTIONS'])
-@cross_origin(origins=["http://localhost:5173", "https://swadhin-frontend-git-main-9898632403s-projects.vercel.app"])
+@cross_origin(origins=["http://localhost:5173"])
 def upload_lookbook_post():
     if request.method == 'OPTIONS':
         return jsonify({'message': 'CORS preflight success'}), 200
@@ -1489,15 +1482,10 @@ def upload_lookbook_post():
         return jsonify({'error': 'Missing fields'}), 400
 
     filename = secure_filename(image_file.filename)
-    upload_folder = os.path.join(app.root_path, 'static', 'uploads', 'lookbook')
-    os.makedirs(upload_folder, exist_ok=True)
-    filepath = os.path.join(upload_folder, filename)
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     image_file.save(filepath)
 
-    # ✅ Use dynamic host URL (works on Railway, localhost, etc.)
-    host = request.host_url.rstrip('/')
-    file_url = f"{host}/static/uploads/lookbook/{filename}"
-
+    file_url = f"http://localhost:5000/uploads/{filename}"
     post = {
         'imageUrl': file_url,
         'caption': caption,
@@ -1511,7 +1499,6 @@ def upload_lookbook_post():
     return jsonify({
         'message': 'Your post has been successfully uploaded 🎉 You can view it in the User Gallery.'
     }), 200
-
 
 # ✅ ADD THIS BELOW your existing routes
 @app.route('/api/lookbook/like', methods=['POST'])
@@ -1639,11 +1626,9 @@ def delete_lookbook_post(post_id):
         return jsonify({'error': 'Internal server error'}), 500
 
 # ✅ Media file serving
-@app.route('/static/uploads/lookbook/<path:filename>')
-def serve_lookbook_file(filename):
-    folder = os.path.join(app.root_path, 'static', 'uploads', 'lookbook')
-    return send_from_directory(folder, filename)
-
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
 # Decorator for admin routes
