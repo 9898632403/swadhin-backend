@@ -839,6 +839,19 @@ Message: {message}
 #         return jsonify(products), 200
 #     except Exception as e:
 #         return jsonify({"error": f"Server error: {str(e)}"}), 500
+# @app.route('/api/products', methods=['GET'])
+# def get_all_products():
+#     try:
+#         query = {}
+#         if request.args.get('bestseller') == "true":
+#             query["bestseller"] = True
+
+#         products = list(products_col.find(query))
+#         for product in products:
+#             product['_id'] = str(product['_id'])
+#         return jsonify(products), 200
+#     except Exception as e:
+#         return jsonify({"error": f"Server error: {str(e)}"}), 500
 @app.route('/api/products', methods=['GET'])
 def get_all_products():
     try:
@@ -846,11 +859,16 @@ def get_all_products():
         if request.args.get('bestseller') == "true":
             query["bestseller"] = True
 
+        print("🔍 Query:", query)
         products = list(products_col.find(query))
+        print("📦 Fetched products:", products)
+
         for product in products:
             product['_id'] = str(product['_id'])
+
         return jsonify(products), 200
     except Exception as e:
+        print("❌ ERROR:", str(e))
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 
