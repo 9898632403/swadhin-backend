@@ -67,9 +67,11 @@ def load_style_data():
 app = Flask(__name__)
 
 # ✅ Final CORS setup for both local + Vercel frontend
+
+
 CORS(
     app,
-    resources={r"/api/*": {"origins": [
+    resources={r"/*": {"origins": [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "https://swadhin-frontend-git-main-9898632403s-projects.vercel.app"
@@ -2038,6 +2040,20 @@ def mark_coupons_seen():
         return jsonify({"message": "Coupons marked as seen"}), 200
     except Exception as e:
         return jsonify({"error": "Failed to mark coupons as seen"}), 500
+
+@app.after_request
+def apply_cors_headers(response):
+    origin = request.headers.get('Origin')
+    if origin in [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://swadhin-frontend-git-main-9898632403s-projects.vercel.app"
+    ]:
+        response.headers["Access-Control-Allow-Origin"] = origin
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-User-Email"
+    return response
     
 
 # POST - Toggle Like/Dislike Reaction
