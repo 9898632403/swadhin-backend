@@ -239,6 +239,7 @@ def delete_hero_slide(slide_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 #gllery section milestone ke niche vala ....................................................
+# 📂 Upload gallery file
 @app.route('/upload/gallery', methods=['POST', 'OPTIONS'])
 @cross_origin(supports_credentials=True, origins=["http://localhost:5173"])
 def upload_gallery_file():
@@ -254,26 +255,30 @@ def upload_gallery_file():
         return jsonify({"error": "No file provided"}), 400
 
     filename = secure_filename(file.filename)
-    upload_folder = os.path.abspath("static/uploads/gallery")
+    upload_folder = os.path.join(app.root_path, "static", "uploads", "gallery")
     os.makedirs(upload_folder, exist_ok=True)
-    upload_path = os.path.join(upload_folder, filename)
-    file.save(upload_path)
-    db.testimonials.update_many({}, { "$set": { "visible": True } })
+    file.save(os.path.join(upload_folder, filename))
 
-    return jsonify({
-        "fileUrl": f"http://localhost:5000/static/uploads/gallery/{filename}"
-    }), 200
+    # ✅ Dynamic file URL
+    host = request.host_url.rstrip('/')
+    file_url = f"{host}/static/uploads/gallery/{filename}"
 
-# 🔓 Serve uploaded gallery file
+    return jsonify({ "fileUrl": file_url }), 200
+
+
+# 🖼️ Serve uploaded gallery files (public)
 @app.route('/static/uploads/gallery/<path:filename>')
 def serve_gallery_file(filename):
     filename = unquote(filename)
-    gallery_folder = os.path.abspath("static/uploads/gallery")
+    gallery_folder = os.path.join(app.root_path, "static", "uploads", "gallery")
     file_path = os.path.join(gallery_folder, filename)
+
     if not os.path.isfile(file_path):
         print(f"🛑 Not Found: {file_path}")
         return abort(404)
+
     return send_from_directory(gallery_folder, filename)
+
 
 # 🔐 Admin: Add a new gallery tile
 @app.route('/admin/gallery', methods=['POST', 'OPTIONS'])
@@ -294,9 +299,15 @@ def add_gallery_tile():
     if data['type'] not in ['image', 'video']:
         return jsonify({"error": "Invalid type"}), 400
 
+    # 🛠️ Fix src if it's not a full URL
+    src = data['src']
+    if not src.startswith("http"):
+        host = request.host_url.rstrip('/')
+        src = f"{host}/{src.lstrip('/')}"
+
     tile = {
         "type": data['type'],
-        "src": data['src'],
+        "src": src,
         "caption": data['caption'].strip(),
         "created_at": datetime.utcnow()
     }
@@ -306,6 +317,7 @@ def add_gallery_tile():
         return jsonify({"message": "Tile added"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 # 🔓 Public: Get all gallery tiles
 @app.route('/gallery', methods=['GET'])
@@ -318,6 +330,7 @@ def get_public_gallery():
         return jsonify({"tiles": tiles}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 # 🔐 Admin: Get all gallery tiles
 @app.route('/admin/gallery', methods=['GET'])
@@ -335,7 +348,8 @@ def get_admin_gallery():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# 🔐 Delete gallery tile
+
+# 🔐 Admin: Delete gallery tile
 @app.route('/admin/gallery/<string:tile_id>', methods=['DELETE'])
 @cross_origin(supports_credentials=True, origins=["http://localhost:5173"])
 def delete_gallery_tile(tile_id):
@@ -349,8 +363,10 @@ def delete_gallery_tile(tile_id):
             return jsonify({"error": "Tile not found"}), 404
         return jsonify({"message": "Tile deleted"}), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500   
+        return jsonify({"error": str(e)}), 500
+  
 #milestone relted routes...................................................................
+# 🔐 Add new testimonial
 @app.route('/admin/testimonial', methods=['POST', 'OPTIONS'])
 @cross_origin(supports_credentials=True, origins=["http://localhost:5173"])
 def add_testimonial():
@@ -370,13 +386,18 @@ def add_testimonial():
         if field not in data or not str(data[field]).strip():
             return jsonify({"error": f"{field} is required"}), 400
 
+    src = data.get('src', '').strip()
+    if src and not src.startswith("http"):
+        host = request.host_url.rstrip('/')
+        src = f"{host}/{src.lstrip('/')}"
+
     new_testimonial = {
         "quote": data['quote'].strip(),
         "author": data['author'].strip(),
         "location": data.get('location', '').strip(),
         "caption": data.get('caption', '').strip(),
         "type": data.get('type', 'image').strip(),  # image or video
-        "src": data.get('src', '').strip(),         # optional media
+        "src": src,
         "visible": data.get('visible', True),
         "created_at": datetime.utcnow()
     }
@@ -388,7 +409,7 @@ def add_testimonial():
         return jsonify({"error": str(e)}), 500
 
 
-# 🔐 Get all testimonials (admin)
+# 🔐 Admin: Get all testimonials
 @app.route('/admin/testimonial', methods=['GET'])
 @cross_origin(supports_credentials=True, origins=["http://localhost:5173"])
 def get_all_testimonials():
@@ -405,7 +426,7 @@ def get_all_testimonials():
         return jsonify({"error": str(e)}), 500
 
 
-# 🔐 Delete testimonial by ID (admin)
+# 🔐 Admin: Delete testimonial
 @app.route('/admin/testimonial/<string:testimonial_id>', methods=['DELETE'])
 @cross_origin(supports_credentials=True, origins=["http://localhost:5173"])
 def delete_testimonial(testimonial_id):
@@ -433,6 +454,7 @@ def get_visible_testimonials():
         return jsonify({"testimonials": testimonials}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 # 🛠️ Utility Functions.......................................................................
 def load_json(filename):
     with open(f'data/{filename}', 'r', encoding='utf-8') as file:
@@ -803,7 +825,7 @@ Message: {message}
 #         "answer": data.get("answer"),
 #         "timestamp": datetime.datetime.utcnow()
 #     })
-    return jsonify({'message': 'Saved successfully'})
+    # return jsonify({'message': 'Saved successfully'})
    
 # @app.route('/api/ai/style-suggestion', methods=['POST'])
 # def style_suggestion():
@@ -1454,7 +1476,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # ✅ POST: Upload Lookbook Post (CORS fix)
 @app.route('/api/lookbook', methods=['POST', 'OPTIONS'])
-@cross_origin(origins=["http://localhost:5173"])
+@cross_origin(origins=["http://localhost:5173", "https://swadhin-frontend-git-main-9898632403s-projects.vercel.app"])
 def upload_lookbook_post():
     if request.method == 'OPTIONS':
         return jsonify({'message': 'CORS preflight success'}), 200
@@ -1467,10 +1489,15 @@ def upload_lookbook_post():
         return jsonify({'error': 'Missing fields'}), 400
 
     filename = secure_filename(image_file.filename)
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    upload_folder = os.path.join(app.root_path, 'static', 'uploads', 'lookbook')
+    os.makedirs(upload_folder, exist_ok=True)
+    filepath = os.path.join(upload_folder, filename)
     image_file.save(filepath)
 
-    file_url = f"http://localhost:5000/uploads/{filename}"
+    # ✅ Use dynamic host URL (works on Railway, localhost, etc.)
+    host = request.host_url.rstrip('/')
+    file_url = f"{host}/static/uploads/lookbook/{filename}"
+
     post = {
         'imageUrl': file_url,
         'caption': caption,
@@ -1484,6 +1511,7 @@ def upload_lookbook_post():
     return jsonify({
         'message': 'Your post has been successfully uploaded 🎉 You can view it in the User Gallery.'
     }), 200
+
 
 # ✅ ADD THIS BELOW your existing routes
 @app.route('/api/lookbook/like', methods=['POST'])
@@ -1611,9 +1639,11 @@ def delete_lookbook_post(post_id):
         return jsonify({'error': 'Internal server error'}), 500
 
 # ✅ Media file serving
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+@app.route('/static/uploads/lookbook/<path:filename>')
+def serve_lookbook_file(filename):
+    folder = os.path.join(app.root_path, 'static', 'uploads', 'lookbook')
+    return send_from_directory(folder, filename)
+
 
 
 # Decorator for admin routes
