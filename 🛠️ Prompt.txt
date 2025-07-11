@@ -1,0 +1,37 @@
+🛠️ Prompt:
+
+I have a React component that currently makes API calls to a hardcoded local backend (e.g., `http://localhost:5000`). I want to update it to use a centralized config file instead.
+
+🔧 What I want you to do:
+
+1. At the top of the file, import the following:
+
+   ```js
+   import { BASE_URL } from "../config";
+   ```
+
+2. Replace all axios/fetch API calls like:
+
+   ```js
+   axios.post("http://localhost:5000/api/endpoint", ...)
+   axios.get("http://localhost:5000/api/endpoint", ...)
+   ```
+
+   with:
+
+   ```js
+   axios.post(`${BASE_URL}/api/endpoint`, ...)
+   axios.get(`${BASE_URL}/api/endpoint`, ...)
+   ```
+
+✅ Constraints:
+
+* ❌ Do **NOT** change anything else in the code.
+* ❌ Do **NOT** rename variables, touch JSX, styles, or logic.
+* ✅ Only import the config and replace base URLs correctly.
+* ✅ If multiple URLs are present, apply the same fix to each one.
+* ✅ No formatting changes or additional edits—just fix the base URL references.
+* 🔐 Do not break authentication headers (like `X-User-Email`).
+
+👇 Here is the actual component code that needs the changes:
+\[ paste full code below this ]

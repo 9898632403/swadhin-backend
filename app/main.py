@@ -152,30 +152,26 @@ def serve_hero_file(filename):
 
 
 # Upload hero banner (image/video)
-@app.route('/upload/hero', methods=['POST', 'OPTIONS'])
-@cross_origin(supports_credentials=True, origins=["http://localhost:5173"])
+@app.route('/upload/hero', methods=['POST'])
 def upload_hero_file():
-    if request.method == 'OPTIONS':
-        return '', 200
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
 
-    user_email = request.headers.get("X-User-Email")
-    if user_email != ALLOWED_USER_EMAIL:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    file = request.files.get("file")
-    if not file:
-        return jsonify({"error": "No file provided"}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
 
     filename = secure_filename(file.filename)
-    upload_folder = "static/uploads/hero"
-    os.makedirs(upload_folder, exist_ok=True)
-    upload_path = os.path.join(upload_folder, filename)
-    file.save(upload_path)
+    upload_path = os.path.join(app.root_path, 'static', 'uploads', 'hero')
+    os.makedirs(upload_path, exist_ok=True)
+    file.save(os.path.join(upload_path, filename))
 
-    # Return full URL so React can access it
+    # ✅ Fix: Use dynamic host instead of hardcoded localhost
+    host = request.host_url.rstrip('/')
     return jsonify({
-        "fileUrl": f"http://localhost:5000/static/uploads/hero/{filename}"
+        "fileUrl": f"{host}/static/uploads/hero/{filename}"
     }), 200
+
 
 # Add a hero slide
 @app.route('/admin/hero-slide', methods=['POST', 'OPTIONS'])
