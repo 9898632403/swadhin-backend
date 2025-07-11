@@ -495,39 +495,46 @@ def send_otp_email(recipient_email, otp):
         print("Email send error:", str(e))
         return False
 
-# 🔐 Signup Route
+# 🔐 SIGNUP Route
 @app.route('/signup', methods=['POST'])
 def signup():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-    username = data.get('username')
+    try:
+        data = request.get_json(force=True)
+        print("📥 Signup request:", data)
 
-    if not email or not password or not username:
-        return jsonify({'error': 'Missing email, password, or username'}), 400
+        email = data.get('email')
+        password = data.get('password')
+        username = data.get('username')
 
-    # 🔐 Allow only trusted domains + admin
-    TRUSTED_DOMAINS = ["gmail.com", "yahoo.com", "apple.com", "outlook.com", "hotmail.com"]
-    email_domain = email.split('@')[-1]
-    if email != ALLOWED_USER_EMAIL and email_domain not in TRUSTED_DOMAINS:
-        return jsonify({'error': 'Only trusted email domains are allowed'}), 400
+        if not email or not password or not username:
+            return jsonify({'error': 'Missing email, password, or username'}), 400
 
-    if users_col.find_one({'email': email}):
-        return jsonify({'error': 'Email already registered'}), 400
+        TRUSTED_DOMAINS = ["gmail.com", "yahoo.com", "apple.com", "outlook.com", "hotmail.com"]
+        email_domain = email.split('@')[-1]
 
-    hashed_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-    users_col.insert_one({'email': email, 'username': username, 'password': hashed_pw})
+        if email != ALLOWED_USER_EMAIL and email_domain not in TRUSTED_DOMAINS:
+            return jsonify({'error': 'Only trusted email domains are allowed'}), 400
 
-    token = create_token(email)
-    return jsonify({'token': token, 'email': email})
+        if users_col.find_one({'email': email}):
+            return jsonify({'error': 'Email already registered'}), 400
 
-# 🔐 Login Route
+        hashed_pw = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        users_col.insert_one({'email': email, 'username': username, 'password': hashed_pw})
+
+        token = create_token(email)
+        return jsonify({'token': token, 'email': email})
+
+    except Exception as e:
+        print("🔥 Signup error:", str(e))
+        return jsonify({'error': 'Signup failed. Please try again.'}), 500
+
+
+# 🔐 LOGIN Route
 @app.route('/login', methods=['POST'])
 def login():
     try:
-        data = request.get_json(silent=True)
-        if not data:
-            return jsonify({'error': 'Invalid JSON format'}), 400
+        data = request.get_json(force=True)
+        print("📥 Login request:", data)
 
         email = data.get('email')
         password = data.get('password')
@@ -550,16 +557,17 @@ def login():
         return jsonify({'token': token, 'email': email, 'isAdmin': email == ALLOWED_USER_EMAIL})
 
     except Exception as e:
-        print("Login error:", str(e))
-        return jsonify({'error': 'Internal server error'}), 500
+        print("🔥 Login error:", str(e))
+        return jsonify({'error': 'Login failed. Please try again.'}), 500
 
-# 🔐 Forgot Password
+
+# 🔐 FORGOT Password
 @app.route('/forgot-password', methods=['POST'])
-@cross_origin()
 def forgot_password():
     try:
-        data = request.get_json()
+        data = request.get_json(force=True)
         email = data.get('email')
+        print("📥 Forgot-password for:", email)
 
         user = users_col.find_one({'email': email})
         if not user:
@@ -569,11 +577,10 @@ def forgot_password():
         expiry_time = time.time() + 300
         otp_store[email] = {'otp': otp, 'expiry': expiry_time}
 
-        print(f"Sending OTP {otp} to {email}")
+        print(f"📨 Sending OTP {otp} to {email}")
 
         sender_email = os.getenv("EMAIL_USER")
         sender_pass = os.getenv("EMAIL_PASS")
-
         if not sender_email or not sender_pass:
             return jsonify({'error': 'Email credentials not set'}), 500
 
@@ -592,15 +599,17 @@ def forgot_password():
         return jsonify({'message': 'OTP sent successfully'})
 
     except Exception as e:
-        print("OTP error:", str(e))
+        print("🔥 Forgot-password error:", str(e))
         return jsonify({'error': 'Failed to send OTP. Please try again.'}), 500
 
-# 🔐 Reset Password
+
+# 🔐 RESET Password
 @app.route('/reset-password', methods=['POST'])
-@cross_origin()
 def reset_password():
     try:
-        data = request.get_json()
+        data = request.get_json(force=True)
+        print("📥 Reset-password request:", data)
+
         email = data.get('email')
         otp = data.get('otp')
         new_password = data.get('new_password')
@@ -626,10 +635,11 @@ def reset_password():
         return jsonify({'message': 'Password updated successfully'})
 
     except Exception as e:
-        print("Reset error:", str(e))
+        print("🔥 Reset-password error:", str(e))
         return jsonify({'error': 'Password reset failed'}), 500
-    
-#admin can delete users 
+
+
+# 🔐 ADMIN: Get All Users
 @app.route('/api/admin/users', methods=['GET'])
 def get_all_users():
     admin_email = request.headers.get('X-User-Email')
@@ -639,24 +649,30 @@ def get_all_users():
     users = list(users_col.find({}, {'_id': 0, 'email': 1, 'username': 1}))
     return jsonify({'users': users})
 
+
+# 🔐 ADMIN: Delete User
 @app.route('/api/admin/users/delete', methods=['POST'])
 def delete_user():
     admin_email = request.headers.get('X-User-Email')
     if admin_email != ALLOWED_USER_EMAIL:
         return jsonify({'error': 'Unauthorized'}), 403
 
-    data = request.get_json()
-    email = data.get('email')
+    try:
+        data = request.get_json(force=True)
+        email = data.get('email')
 
-    if not email:
-        return jsonify({'error': 'Email is required'}), 400
+        if not email:
+            return jsonify({'error': 'Email is required'}), 400
 
-    result = users_col.delete_one({'email': email})
-    if result.deleted_count == 1:
-        return jsonify({'message': f'User {email} deleted successfully'})
-    else:
-        return jsonify({'error': 'User not found'}), 404
+        result = users_col.delete_one({'email': email})
+        if result.deleted_count == 1:
+            return jsonify({'message': f'User {email} deleted successfully'})
+        else:
+            return jsonify({'error': 'User not found'}), 404
 
+    except Exception as e:
+        print("🔥 Delete-user error:", str(e))
+        return jsonify({'error': 'Failed to delete user'}), 500
 
 #these routes for trend anlysis thats not work 
 # @app.route('/api/trends/daily', methods=['GET'])
