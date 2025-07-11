@@ -137,72 +137,50 @@ def is_admin():
 # ✅ Banners......................................................................................
 @app.route('/static/uploads/hero/<path:filename>')
 def serve_hero_file(filename):
-    filename = unquote(filename)
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-    # 👉 ABSOLUTE path to your hero folder
-    hero_folder = r"C:\Users\meetm\OneDrive\Desktop\SWADHIN\swadhin-backend\static\uploads\hero"
-
-    file_path = os.path.join(hero_folder, filename)
-
-    if not os.path.isfile(file_path):
-        print(f"🛑 Not Found: {file_path}")
-        return abort(404)
-
-    return send_from_directory(hero_folder, filename)
-
-
-# Upload hero banner (image/video)
+# 📥 Route: Upload Hero Banner
 @app.route('/upload/hero', methods=['POST'])
+@cross_origin(supports_credentials=True)
 def upload_hero_file():
     if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
+        return jsonify({"error": "No file provided"}), 400
 
     file = request.files['file']
     if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+        return jsonify({"error": "No file selected"}), 400
 
     filename = secure_filename(file.filename)
-    upload_path = os.path.join(app.root_path, 'static', 'uploads', 'hero')
-    os.makedirs(upload_path, exist_ok=True)
-    file.save(os.path.join(upload_path, filename))
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(filepath)
 
-    # ✅ Fix: Use dynamic host instead of hardcoded localhost
+    # ✅ Generate full public URL
     host = request.host_url.rstrip('/')
-    return jsonify({
-        "fileUrl": f"{host}/static/uploads/hero/{filename}"
-    }), 200
+    file_url = f"{host}/static/uploads/hero/{filename}"
 
+    return jsonify({"fileUrl": file_url, "fileName": filename}), 200
 
-# Add a hero slide
-@app.route('/admin/hero-slide', methods=['POST', 'OPTIONS'])
-@cross_origin(supports_credentials=True, origins=["http://localhost:5173"])
+# 📌 Route: Add a Hero Slide (admin only)
+@app.route('/admin/hero-slide', methods=['POST'])
+@cross_origin(supports_credentials=True)
 def add_hero_slide():
-    if request.method == 'OPTIONS':
-        return '', 200
-
     user_email = request.headers.get("X-User-Email")
     if user_email != ALLOWED_USER_EMAIL:
         return jsonify({"error": "Unauthorized access"}), 401
 
     data = request.get_json(silent=True)
-    if not data:
-        return jsonify({'error': 'Invalid JSON'}), 400
-
     required_fields = ['type', 'src', 'text', 'subtitle', 'overlayColor']
     for field in required_fields:
-        if field not in data or not data[field]:
+        if not data.get(field):
             return jsonify({'error': f'{field} is required'}), 400
 
-    if data['type'] not in ['image', 'video']:
-        return jsonify({'error': 'Invalid type (must be image or video)'}), 400
-
-    # 💡 Fix src if it’s not a full URL
+    # 💡 Ensure src is a proper URL
     src = data['src']
     if not src.startswith("http"):
         host = request.host_url.rstrip('/')
-        src = f"{host}{src.lstrip('/')}"
+        src = f"{host}/{src.lstrip('/')}"
 
-    new_slide = {
+    slide = {
         "type": data['type'],
         "src": src,
         "text": data['text'],
@@ -212,27 +190,27 @@ def add_hero_slide():
     }
 
     try:
-        db.hero_slides.insert_one(new_slide)
+        db.hero_slides.insert_one(slide)
         return jsonify({"message": "Slide added successfully"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-# Get all hero slides
+# 📤 Route: Get all public hero slides
 @app.route('/hero-slides', methods=['GET'])
-@cross_origin(supports_credentials=True, origins=["http://localhost:5173"])
-def get_hero_slides():
+@cross_origin(supports_credentials=True)
+def get_public_hero_slides():
     try:
         slides = list(db.hero_slides.find().sort("created_at", -1))
-        for s in slides:
-            s['_id'] = str(s['_id'])
+        for slide in slides:
+            slide['_id'] = str(slide['_id'])
         return jsonify({"slides": slides}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-#get all banners for all banner at admin side...............................................
+
+# 👑 Route: Get all slides (admin panel)
 @app.route('/admin/hero-slide', methods=['GET'])
-@cross_origin(supports_credentials=True, origins=["http://localhost:5173"])
-def get_all_hero_slides():
+@cross_origin(supports_credentials=True)
+def get_admin_hero_slides():
     user_email = request.headers.get("X-User-Email")
     if user_email != ALLOWED_USER_EMAIL:
         return jsonify({"error": "Unauthorized access"}), 401
@@ -240,13 +218,14 @@ def get_all_hero_slides():
     try:
         slides = list(db.hero_slides.find().sort("created_at", -1))
         for slide in slides:
-            slide["_id"] = str(slide["_id"])
+            slide['_id'] = str(slide['_id'])
         return jsonify({"slides": slides}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# ❌ Route: Delete slide by ID
 @app.route('/admin/hero-slide/<string:slide_id>', methods=['DELETE'])
-@cross_origin(supports_credentials=True, origins=["http://localhost:5173"])
+@cross_origin(supports_credentials=True)
 def delete_hero_slide(slide_id):
     user_email = request.headers.get("X-User-Email")
     if user_email != ALLOWED_USER_EMAIL:
