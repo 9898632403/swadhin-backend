@@ -102,6 +102,8 @@ def serve_uploaded_file(filename):
 
 # 🗃️ MongoDB Setup
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+print("📦 MONGO_URI is:", MONGO_URI)
+
 client = MongoClient(MONGO_URI)
 db = client["swadhin"]
 # db.testimonials.update_many({}, { "$set": { "visible": True } })
