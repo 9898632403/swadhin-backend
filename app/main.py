@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 import random
 import bcrypt
 import jwt
+import cloudinary
+import cloudinary.uploader
 # import torch
 import razorpay
 import mimetypes
@@ -29,6 +31,11 @@ from email.message import EmailMessage
 # Load environment variables
 load_dotenv()
 
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+)
 # # Razorpay client
 # razorpay_client = razorpay.Client(
 #     auth=(os.getenv("RAZORPAY_KEY_ID"), os.getenv("RAZORPAY_KEY_SECRET"))
@@ -150,15 +157,14 @@ def upload_hero_file():
     if file.filename == '':
         return jsonify({"error": "No file selected"}), 400
 
-    filename = secure_filename(file.filename)
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(filepath)
-
-    # ✅ Generate full public URL
-    host = request.host_url.rstrip('/')
-    file_url = f"{host}/static/uploads/hero/{filename}"
-
-    return jsonify({"fileUrl": file_url, "fileName": filename}), 200
+    try:
+        result = cloudinary.uploader.upload(file, folder="swadhin/hero")
+        return jsonify({
+            "fileUrl": result["secure_url"],
+            "fileName": result["public_id"]
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # 📌 Route: Add a Hero Slide (admin only)
 @app.route('/admin/hero-slide', methods=['POST'])
@@ -1028,21 +1034,12 @@ def upload_image():
     if image.filename == '':
         return jsonify({'error': 'Empty filename'}), 400
 
-    # Create upload directory if it doesn't exist
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
-    # Generate unique filename to prevent collisions
-    filename = secure_filename(image.filename)
-    unique_filename = f"{datetime.now().timestamp()}_{filename}"
-    save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
-    
     try:
-        image.save(save_path)
-        # Use request.host_url to make the URL dynamic
-        image_url = f"{request.host_url}static/uploads/products/{unique_filename}"
-        return jsonify({'url': image_url}), 200
+        # Upload to Cloudinary inside the "swadhin/products" folder
+        result = cloudinary.uploader.upload(image, folder="swadhin/products")
+        return jsonify({'url': result['secure_url']}), 200
     except Exception as e:
-        return jsonify({'error': f'Failed to save image: {str(e)}'}), 500
+        return jsonify({'error': f'Cloudinary upload failed: {str(e)}'}), 500
 
 #PAYMENT FLOW
 @app.route("/api/create-order", methods=["POST"])
