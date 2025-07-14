@@ -1044,26 +1044,6 @@ def upload_image():
     except Exception as e:
         return jsonify({'error': f'Failed to save image: {str(e)}'}), 500
 
-# Chatbot Flow
-# chatbot_flow = {
-#     "start": {
-#         "question": "What kind of fashion help do you need today?",
-#         "options": {
-#             "Party Look": "party_look",
-#             "College Outfit": "college_look",
-#             "Ethnic Wear": "ethnic_wear",
-#             "Seasonal Styling": "seasonal_style"
-#         }
-#     },
-#     "final_suggestion": {
-#         "question": "Tell us more about your preferences or any specific outfit idea you have in mind!",
-#         "input": True,
-#         "store_in_db": True
-#     }
-# }
-
-
-#order relateddd ALL routes
 #PAYMENT FLOW
 @app.route("/api/create-order", methods=["POST"])
 def create_razorpay_order():
@@ -1076,7 +1056,10 @@ def create_razorpay_order():
 
         amount_paise = int(float(amount) * 100)  # Convert to paise
 
-        razorpay_order = razorpay_client.order.create({
+        # ✅ Create client here using your helper function
+        client = get_razorpay_client()
+
+        razorpay_order = client.order.create({
             "amount": amount_paise,
             "currency": "INR",
             "payment_capture": 1,
@@ -1090,6 +1073,7 @@ def create_razorpay_order():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
     
 @app.route('/api/orders', methods=['POST'])
 def save_order():
@@ -1252,28 +1236,6 @@ def update_order_status(order_id):
     else:
         return jsonify({"error": "Order not found or no changes made"}), 404
 
-
-
-# @app.route('/api/style-quiz', methods=['POST'])
-# def save_style_quiz():
-#     try:
-#         data = request.get_json()
-#         user_email = data.get('email')
-#         answers = data.get('answers')
-
-#         if not user_email or not answers:
-#             return jsonify({'error': 'Missing data'}), 400
-
-#         style_quiz_doc = {
-#             'email': user_email,
-#             'answers': answers,
-#             'timestamp': datetime.datetime.utcnow()
-#         }
-
-#         db.style_quiz_answers.insert_one(style_quiz_doc)
-#         return jsonify({'message': 'Quiz answers saved successfully!'}), 200
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500  # ✅ FIX: Better error reporting
 
 @app.route('/api/orders/<email>', methods=['GET'])
 def get_orders(email):
