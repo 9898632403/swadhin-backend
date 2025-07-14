@@ -552,6 +552,25 @@ def login():
         print("🔥 Login error:", str(e))
         return jsonify({'error': 'Login failed. Please try again.'}), 500
 
+@app.route("/auth/logout", methods=["POST", "OPTIONS"])
+@cross_origin(
+    origins="https://swadhin-frontend-git-main-9898632403s-projects.vercel.app",
+    allow_headers=["Content-Type", "Authorization"],
+    supports_credentials=True
+)
+def logout():
+    if request.method == "OPTIONS":
+        # Preflight response for CORS
+        response = make_response()
+        response.headers["Access-Control-Allow-Origin"] = "https://swadhin-frontend-git-main-9898632403s-projects.vercel.app"
+        response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        return response, 204
+
+    # Main logout logic (optional: remove session or token if needed)
+    response = jsonify({"message": "Logged out"})
+    response.headers["Access-Control-Allow-Origin"] = "https://swadhin-frontend-git-main-9898632403s-projects.vercel.app"
+    return response, 200
 
 # 🔐 FORGOT Password
 @app.route('/forgot-password', methods=['POST'])
