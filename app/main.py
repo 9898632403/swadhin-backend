@@ -80,18 +80,16 @@ app = Flask(__name__)
 
 CORS(
     app,
-    resources={
-        r"/*": {
-            "origins": [
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "https://swadhin-frontend-git-main-9898632403s-projects.vercel.app"
-            ],
-            "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH"],
-            "allow_headers": ["Content-Type", "Authorization", "X-User-Email"],
-            "supports_credentials": True
-        }
-    }
+    resources={r"/*": {
+        "origins": [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "https://swadhin-frontend-git-main-9898632403s-projects.vercel.app"
+        ],
+        "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH"],  # ✅ PATCH allowed
+        "allow_headers": ["Content-Type", "Authorization", "X-User-Email"],
+        "supports_credentials": True
+    }}
 )
 @app.route('/admin/<path:path>', methods=['OPTIONS'])
 def cors_preflight(path):
@@ -1235,11 +1233,12 @@ Thank you for shopping with SWADHIN 💖
 #         return jsonify({"message": "Order status updated successfully"}), 200
 #     else:
 #         return jsonify({"error": "Order not found or no changes made"}), 404
-@app.route('/api/orders/<order_id>/update-status', methods=['PATCH', 'OPTIONS'])  # ✅ Added OPTIONS
+@app.route('/api/orders/<order_id>/update-status', methods=['PATCH', 'OPTIONS'])  # ✅ PATCH + OPTIONS for CORS
 @cross_origin(
-    origin="https://swadhin-frontend-git-main-9898632403s-projects.vercel.app",  # ✅ Your frontend
-    methods=["PATCH", "OPTIONS"],  # ✅ Allow PATCH and preflight OPTIONS
-    supports_credentials=True
+    origin="https://swadhin-frontend-git-main-9898632403s-projects.vercel.app",  # ✅ frontend
+    methods=["PATCH", "OPTIONS"],  # ✅ allow PATCH + preflight
+    supports_credentials=True,
+    allow_headers=["Content-Type", "X-User-Email"]  # ✅ needed headers
 )
 def update_order_status(order_id):
     from datetime import datetime
@@ -1263,7 +1262,6 @@ def update_order_status(order_id):
         return jsonify({"message": "Order status updated successfully"}), 200
     else:
         return jsonify({"error": "Order not found or no changes made"}), 404
-
 @app.route('/api/orders/<email>', methods=['GET'])
 def get_orders(email):
     try:
