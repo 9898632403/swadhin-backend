@@ -80,19 +80,16 @@ app = Flask(__name__)
 
 CORS(
     app,
-    resources={
-        r"/*": {
-            "origins": [
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "https://swadhin-frontend-git-main-9898632403s-projects.vercel.app"
-            ],
-            "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH"],
-            "allow_headers": ["Content-Type", "Authorization", "X-User-Email"]
-        }
-    },
+    resources={r"/*": {"origins": [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://swadhin-frontend-git-main-9898632403s-projects.vercel.app"
+    ]}},
+    methods=["GET", "POST", "OPTIONS", "PUT", "DELETE", "PATCH"],
+    allow_headers=["Content-Type", "Authorization", "X-User-Email"],
     supports_credentials=True
 )
+
 
 @app.route('/admin/<path:path>', methods=['OPTIONS'])
 def cors_preflight(path):
