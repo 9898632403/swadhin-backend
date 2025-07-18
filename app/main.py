@@ -1212,35 +1212,7 @@ Thank you for shopping with SWADHIN 💖
 
     return jsonify({'message': 'Order saved and email sent successfully ✅'}), 201
 
-@app.route('/api/orders/<order_id>/update-status', methods=['PATCH'])
-def update_order_status(order_id):
-    from datetime import datetime
-    data = request.get_json()
-    new_status = data.get('status')
-
-    if not new_status:
-        return jsonify({'error': 'Status is required'}), 400
-
-    result = orders_col.update_one(
-        {"_id": ObjectId(order_id)},
-        {
-            "$set": {
-                "status": new_status,
-                "statusUpdatedAt": datetime.utcnow()
-            }
-        }
-    )
-
-    if result.modified_count == 1:
-        return jsonify({"message": "Order status updated successfully"}), 200
-    else:
-        return jsonify({"error": "Order not found or no changes made"}), 404
-# @app.route('/api/orders/<order_id>/update-status', methods=['PATCH', 'OPTIONS'])  # ✅ Added OPTIONS
-# @cross_origin(
-#     origin="https://swadhin-frontend-git-main-9898632403s-projects.vercel.app",  # ✅ Your frontend
-#     methods=["PATCH", "OPTIONS"],  # ✅ Allow PATCH and preflight OPTIONS
-#     supports_credentials=True
-# )
+# @app.route('/api/orders/<order_id>/update-status', methods=['PATCH'])
 # def update_order_status(order_id):
 #     from datetime import datetime
 #     data = request.get_json()
@@ -1263,6 +1235,34 @@ def update_order_status(order_id):
 #         return jsonify({"message": "Order status updated successfully"}), 200
 #     else:
 #         return jsonify({"error": "Order not found or no changes made"}), 404
+@app.route('/api/orders/<order_id>/update-status', methods=['PATCH', 'OPTIONS'])  # ✅ Added OPTIONS
+@cross_origin(
+    origin="https://swadhin-frontend-git-main-9898632403s-projects.vercel.app",  # ✅ Your frontend
+    methods=["PATCH", "OPTIONS"],  # ✅ Allow PATCH and preflight OPTIONS
+    supports_credentials=True
+)
+def update_order_status(order_id):
+    from datetime import datetime
+    data = request.get_json()
+    new_status = data.get('status')
+
+    if not new_status:
+        return jsonify({'error': 'Status is required'}), 400
+
+    result = orders_col.update_one(
+        {"_id": ObjectId(order_id)},
+        {
+            "$set": {
+                "status": new_status,
+                "statusUpdatedAt": datetime.utcnow()
+            }
+        }
+    )
+
+    if result.modified_count == 1:
+        return jsonify({"message": "Order status updated successfully"}), 200
+    else:
+        return jsonify({"error": "Order not found or no changes made"}), 404
 
 @app.route('/api/orders/<email>', methods=['GET'])
 def get_orders(email):
