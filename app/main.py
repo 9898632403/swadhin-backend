@@ -1233,17 +1233,15 @@ Thank you for shopping with SWADHIN 💖
 #         return jsonify({"message": "Order status updated successfully"}), 200
 #     else:
 #         return jsonify({"error": "Order not found or no changes made"}), 404
-@app.route('/api/orders/<order_id>/update-status', methods=['PATCH', 'OPTIONS'])
-@cross_origin(origins="*", methods=["PATCH", "OPTIONS"])
-def update_order_status(order_id):
-    if request.method == 'OPTIONS':
-        return jsonify({}), 200
-
+@app.route('/api/admin/update-status', methods=['POST'])
+@cross_origin(origins="*", methods=["POST"])
+def admin_update_status():
     data = request.get_json()
-    new_status = data.get('status')
+    order_id = data.get("order_id")
+    new_status = data.get("status")
 
-    if not new_status:
-        return jsonify({'error': 'Status is required'}), 400
+    if not order_id or not new_status:
+        return jsonify({"error": "Order ID and new status are required"}), 400
 
     result = orders_col.update_one(
         {"_id": ObjectId(order_id)},
@@ -1259,6 +1257,8 @@ def update_order_status(order_id):
         return jsonify({"message": "Order status updated successfully"}), 200
     else:
         return jsonify({"error": "Order not found or no changes made"}), 404
+
+
 @app.route('/api/orders/<email>', methods=['GET'])
 def get_orders(email):
     try:
@@ -1270,34 +1270,7 @@ def get_orders(email):
     except Exception as e:
         return jsonify({'error': str(e)}), 500  # ✅ FIX: Added error handling
 
-@app.route('/api/orders/<order_id>', methods=['DELETE'])
-def delete_order(order_id):
-    try:
-        result = orders_col.delete_one({'_id': ObjectId(order_id)})
-        if result.deleted_count == 0:
-            return jsonify({'error': 'Order not found'}), 404
-        return jsonify({'message': 'Order deleted successfully'}), 200
-    except Exception as e:  # ✅ FIX: Catch specific exception
-        return jsonify({'error': f'Invalid order ID: {str(e)}'}), 400
 
-@app.route('/api/orders/clear-all', methods=['POST'])
-def clear_all_orders():
-    data = request.get_json()
-    email = data.get('email')
-    password = data.get('password')
-
-    if not email or not password:
-        return jsonify({'error': 'Email and password are required'}), 400
-
-    user = users_col.find_one({'email': email})
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-
-    if not bcrypt.checkpw(password.encode('utf-8'), user['password']):
-        return jsonify({'error': 'Incorrect password'}), 403
-
-    result = orders_col.delete_many({'email': email})
-    return jsonify({'message': f'{result.deleted_count} orders deleted successfully'}), 200
 
 # GET - Admin: Get all orders
 @app.route('/api/orders', methods=['GET'])
