@@ -1,0 +1,29 @@
+viteconfig.js 
+
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import svgr from 'vite-plugin-svgr'
+
+export default defineConfig(({ mode }) => ({
+  plugins: [
+    react(),
+    svgr({
+      svgrOptions: {
+        // svgr options
+      }
+    })
+  ],
+  ...(mode === 'development' && {
+    server: {
+      host: '0.0.0.0',
+      strictPort: true,
+      port: 5173,
+      allowedHosts: ['.ngrok-free.app'],
+    }
+  })
+}))
+
+terminal setup
+
+cd "C:\Users\meetm\Downloads\ngrok-v3-stable-windows-amd64"
+.\ngrok.exe http 5173

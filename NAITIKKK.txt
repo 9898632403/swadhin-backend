@@ -1,0 +1,953 @@
+##APP.jsx###
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Products from "./pages/Products";
+import ProductDetail from "./pages/productDetail";
+import Contact from "./pages/Contact";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import { CartProvider } from "./context/CartContext";
+import { UserProvider } from "./context/UserContext";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import UserInfo from "./pages/UserInfo";
+import Auth from "./pages/Auth";
+import OrderConfirmation from "./pages/OrderConfirmation";
+import OrderHistory from "./pages/OrderHistory";
+// import Chatbot from "./components/Chatbot";
+{/* TEMP REDEPLOY COMMENT */} 
+import ProductForm from "./components/ProductForm";
+import StyleQuiz from "./pages/StyleQuiz";
+import ProtectedRoute from "./components/ProtectedRoute";
+import UserGallery from './pages/UserGallery';
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
+
+// ✅ Admin Pages
+import AddCoupon from './pages/admin/AddCoupon';
+import AllCoupons from './pages/admin/AllCoupons';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers from './pages/AdminUsers';
+import HeroForm from "./components/HeroSlideForm"; // ya jaha bhi file hai
+import TestimonialForm from "./components/TestimonialForm";
+import GalleryTileForm from "./components/GalleryTileForm";
+
+
+
+// ✅ Google OAuth
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
+function App() {
+  return (
+    <GoogleOAuthProvider clientId="514242313773-ic3td639ucmhu1493eh5m35r9pi5s7pp.apps.googleusercontent.com">
+      <UserProvider>
+        <CartProvider>
+          <Router>
+            <Navbar />
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/product/:productId" element={<ProductDetail />} />
+              <Route path="/gallery" element={<UserGallery />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/style-quiz" element={<StyleQuiz />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+
+              {/* 🔒 Protected User Routes */}
+              <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+              <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+              <Route path="/userinfo" element={<ProtectedRoute><UserInfo /></ProtectedRoute>} />
+              <Route path="/orderhistory" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
+               {/* 🛠️ Admin-only Routes */}
+              <Route path="/admin/add-product" element={<ProtectedRoute adminOnly={true}><ProductForm /></ProtectedRoute>} />
+              <Route path="/admin/add-coupon" element={<ProtectedRoute adminOnly={true}><AddCoupon /></ProtectedRoute>} />
+              <Route path="/admin/all-coupons" element={<ProtectedRoute adminOnly={true}><AllCoupons /></ProtectedRoute>} />
+              <Route path="/admin/dashboard" element={<ProtectedRoute adminOnly={true}><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/admin/users" element={<ProtectedRoute adminOnly={true}><AdminUsers /></ProtectedRoute>} />
+              <Route path="/admin/hero-form" element={<ProtectedRoute adminOnly={true}><HeroForm /></ProtectedRoute>} />
+              <Route path="/admin/testimonial-form" element={<ProtectedRoute adminOnly={true}><TestimonialForm /></ProtectedRoute>} />
+              <Route path="/admin/gallery-form" element={<ProtectedRoute adminOnly={true}><GalleryTileForm /></ProtectedRoute>} />
+
+              {/* Fallback */}
+              <Route path="*" element={<div>Page not found</div>} />
+            </Routes>
+            {/* <Chatbot /> */}
+            <Footer />
+          </Router>
+        </CartProvider>
+      </UserProvider>
+    </GoogleOAuthProvider>
+  );
+}
+
+export default App;
+
+
+#HOME##
+import React, { useEffect, useState } from "react";
+import { BASE_URL } from "../config";
+import HeroSection from "../components/HeroSection";
+import AISection from "../components/AISection";
+import ScratchCardPopup from "../components/ScratchCardPopup";
+
+const Home = () => {
+  const [showPopup, setShowPopup] = useState(false);
+  const [userCoupon, setUserCoupon] = useState(null);
+
+  useEffect(() => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const userEmail = userInfo?.email || "";
+
+    const hasUsedWelcome = localStorage.getItem(`welcomeUsed_${userEmail}`) === "true";
+
+    if (!hasUsedWelcome && userInfo) {
+      fetch(`${BASE_URL}/api/coupons`)
+        .then((res) => res.json())
+        .then((data) => {
+          const welcomeCoupon = data.find((c) => c.is_welcome_coupon === true);
+          if (welcomeCoupon) {
+            setUserCoupon(welcomeCoupon);
+            setShowPopup(true);
+            localStorage.setItem(`coupon_${userEmail}`, JSON.stringify(welcomeCoupon));
+          }
+        });
+    }
+
+    // 🧠 Unlock autoplay
+    const playSilentAudio = () => {
+      const dummy = new Audio();
+      dummy.muted = true;
+      dummy.play().catch(() => {});
+    };
+    document.body.addEventListener("click", playSilentAudio, { once: true });
+  }, []);
+
+  const handleClose = () => setShowPopup(false);
+
+  const handleReveal = () => {
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const userEmail = userInfo?.email || "";
+    localStorage.setItem(`scratchRevealed_${userEmail}`, "true");
+
+    if (userCoupon?.code) {
+      localStorage.setItem(`usedCoupon_${userEmail}`, userCoupon.code);
+    }
+  };
+
+  return (
+    <main>
+      {/* 🎁 Scratch popup */}
+      {showPopup && userCoupon && (
+        <ScratchCardPopup
+          coupon={userCoupon}
+          onClose={handleClose}
+          onReveal={handleReveal}
+        />
+      )}
+
+      <HeroSection />
+      <AISection />
+    </main>
+  );
+};
+
+export default Home;
+
+
+
+
+import React, { useRef, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, EffectFade, Parallax } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/effect-fade";
+import "swiper/css/parallax";
+import "../styles/HeroSection.css";
+import { BASE_URL } from "../config";
+
+const HeroSection = () => {
+  const navigate = useNavigate();
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
+  const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [slides, setSlides] = useState([]);
+  const [trendingProducts, setTrendingProducts] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
+  const [galleryTiles, setGalleryTiles] = useState([]);
+
+  useEffect(() => {
+    const brandStory = document.querySelector(".brand-story-section");
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          brandStory.classList.add("brand-story-visible");
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    if (brandStory) observer.observe(brandStory);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/hero-slides`, { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => setSlides(data.slides || []))
+      .catch((err) => console.error("❌ Hero slides fetch failed:", err));
+  }, []);
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/api/products/trending`)
+      .then((res) => res.json())
+      .then((data) => setTrendingProducts(data))
+      .catch((err) => console.error("❌ Trending fetch failed:", err));
+  }, []);
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/testimonials`)
+      .then(res => res.json())
+      .then(data => {
+        setTestimonials(data.testimonials || []);
+      })
+      .catch(err => {
+        console.error("❌ Testimonials fetch failed:", err);
+      });
+  }, []);
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/gallery`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Gallery fetch failed: ${res.status}`);
+        return res.json();
+      })
+      .then((data) => setGalleryTiles(data.tiles || []))
+      .catch(err => console.error("❌ Gallery tiles fetch failed:", err));
+  }, []);
+
+  return (
+    <section className="hero-luxury" ref={containerRef}>
+      {/* HERO SLIDES */}
+      <div className="hero-slider-container">
+        <Swiper
+          modules={[Autoplay, EffectFade, Parallax]}
+          effect="fade"
+          speed={2000}
+          parallax={true}
+          autoplay={{ delay: 8500, disableOnInteraction: false }}
+          loop={true}
+          className="luxury-swiper"
+          onSlideChange={(swiper) => setActiveSlide(swiper.realIndex)}
+        >
+          {slides.map((slide, index) => (
+            <SwiperSlide key={slide._id || index}>
+              <motion.div className="hero-slide" style={{ y: yBg }}>
+                {slide.type === "video" ? (
+                  <video
+                    className="hero-bg-media"
+                    src={slide.src}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                  />
+                ) : (
+                  <img
+                    src={slide.src}
+                    alt=""
+                    className="hero-bg-media"
+                    loading="eager"
+                  />
+                )}
+                <div
+                  className="overlay-tint"
+                  style={{ backgroundColor: slide.overlayColor }}
+                />
+                <motion.div
+                  className="hero-text-layer"
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <div className="text-container">
+                    <motion.h1
+                      className="serif-display"
+                      data-swiper-parallax="-300"
+                      data-swiper-parallax-duration="600"
+                    >
+                      {slide.text}
+                    </motion.h1>
+                    <motion.p
+                      className="subtitle sans-serif"
+                      data-swiper-parallax="-200"
+                      data-swiper-parallax-duration="800"
+                    >
+                      {slide.subtitle}
+                    </motion.p>
+                  </div>
+                </motion.div>
+              </motion.div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
+        <div className="slide-indicator">
+          {slides.map((_, index) => (
+            <div
+              key={index}
+              className={`indicator-dot ${index === activeSlide ? "active" : ""}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* CTA BUTTONS */}
+      <motion.div
+        className="hero-cta-layer"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2.8, duration: 1.5 }}
+      >
+        <div className="cta-container">
+          <button className="cta-button solid" onClick={() => navigate("/products")}>Explore Collection →</button>
+          <div className="cta-divider"></div>
+          <button className="cta-button outline" onClick={() => navigate("/gallery")}>View User Gallery ↗</button>
+        </div>
+      </motion.div>
+
+      {/* TRENDING SECTION */}
+      <div className="curated-section">
+        <div className="section-header">
+          <h2 className="serif-heading">Trending Now</h2>
+          <p className="section-subtitle sans-serif">Discover what's captivating our community</p>
+        </div>
+        <div className="curated-grid">
+          {trendingProducts.map((prod) => (
+            <motion.div
+              key={prod._id}
+              className="curated-card"
+              whileHover={{ y: -8 }}
+              onClick={() => navigate(`/product/${prod._id}`)}
+            >
+              <div className="product-image-container">
+                <img src={prod.image} alt={prod.name} className="product-image" />
+                {prod.category && <div className="product-badge">{prod.category}</div>}
+              </div>
+              <div className="product-info">
+                <h3 className="serif-subhead">{prod.name}</h3>
+                <p className="product-price sans-serif">₹{prod.price}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* BRAND STORY */}
+      <div className="brand-story-section">
+        <div className="story-container">
+          <div className="story-content">
+            <span className="section-tag sans-serif">Heritage</span>
+            <h2 className="serif-heading">The SWADHIN Narrative</h2>
+            <div className="story-columns">
+              <p className="lead-paragraph serif-body">
+                In the quiet villages of India, where time moves to the rhythm of artisan hands, SWADHIN finds its soul.
+              </p>
+              <div className="column-group">
+                <p className="serif-body">
+                  Born from a reverence for traditional craftsmanship and sustainable practices, each collection tells a story of cultural preservation.
+                </p>
+                <p className="serif-body">
+                  This is not merely fashion—it's wearable art with conscience.
+                </p>
+              </div>
+            </div>
+            <motion.button className="story-cta" whileHover={{ x: 4 }} onClick={() => navigate("/about")}>Discover Our Craft ⟶</motion.button>
+          </div>
+          <div className="story-visual">
+            <div className="story-image-wrapper">
+              <img src="/images/story-bg.jpg" alt="Artisans at work" className="story-image" />
+              <div className="image-overlay"></div>
+            </div>
+            <div className="story-accent"></div>
+          </div>
+        </div>
+      </div>
+
+      {/* TESTIMONIAL SECTION */}
+      <div className="testimonial-section">
+        <div className="section-header">
+          <h2 className="serif-heading">Voices of Appreciation</h2>
+          <p className="section-subtitle sans-serif">From those who cherish authenticity</p>
+        </div>
+        <div className="testimonial-slider">
+          <Swiper
+            slidesPerView="auto"
+            spaceBetween={40}
+            centeredSlides={true}
+            loop={true}
+            autoplay={{ delay: 6000, disableOnInteraction: false }}
+            className="testimonial-swiper"
+          >
+            {testimonials.length === 0 ? (
+              <SwiperSlide>
+                <div className="testimonial-card">
+                  <div className="quote-mark serif-display">"</div>
+                  <blockquote className="testimonial-quote serif-body">
+                    No testimonials yet. Be the first to share your SWADHIN story.
+                  </blockquote>
+                  <div className="testimonial-author sans-serif">
+                    <span className="author-name">Team SWADHIN</span>
+                    <span className="author-location">India</span>
+                  </div>
+                </div>
+              </SwiperSlide>
+            ) : (
+              testimonials.map((t, i) => {
+                const raw = t.quote || "";
+                const clean = raw.replace(/^["“”']+|["“”']+$/g, "").trim();
+                return (
+                  <SwiperSlide key={`${t._id}-${i}`} className="testimonial-slide">
+                    <div className="testimonial-card">
+                      {t.src && (
+                        <div className="media-preview">
+                          {t.type === "video" ? (
+                            <video
+                              src={t.src}
+                              controls
+                              muted
+                              className="testimonial-media"
+                            />
+                          ) : (
+                            <img
+                              src={t.src}
+                              alt={t.caption || "testimonial"}
+                              className="testimonial-media"
+                            />
+                          )}
+                        </div>
+                      )}
+                      <div className="quote-mark serif-display">"</div>
+                      <blockquote className="testimonial-quote serif-body">
+                        {clean || "No message provided."}
+                      </blockquote>
+                      <div className="testimonial-author sans-serif">
+                        <span className="author-name">{t.author}</span>
+                        {t.location && <span className="author-location">{t.location}</span>}
+                      </div>
+                      {t.caption && (
+                        <p className="testimonial-caption sans-serif">{t.caption}</p>
+                      )}
+                    </div>
+                  </SwiperSlide>
+                );
+              })
+            )}
+          </Swiper>
+        </div>
+      </div>
+
+      {/* GALLERY SECTION */}
+      <div className="gallery-section">
+        <div className="section-header">
+          <h2 className="serif-heading">The Artisan Journey</h2>
+          <p className="section-subtitle sans-serif">Witness the hands behind each creation</p>
+        </div>
+        <div className="gallery-grid">
+          {galleryTiles.length === 0 ? (
+            <p className="sans-serif" style={{ textAlign: "center" }}>
+              No gallery tiles available yet.
+            </p>
+          ) : (
+            galleryTiles.map((tile) => (
+              <motion.div
+                key={tile._id}
+                className="gallery-tile"
+                whileHover={{ scale: 0.98 }}
+                transition={{ duration: 0.4 }}
+              >
+                {tile.type === "video" ? (
+                  <video
+                    src={tile.src}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="tile-image"
+                  />
+                ) : (
+                  <img
+                    src={tile.src}
+                    alt={tile.caption || "Gallery Tile"}
+                    className="tile-image"
+                  />
+                )}
+                <div className="tile-overlay">
+                  <p className="tile-caption sans-serif">{tile.caption}</p>
+                </div>
+              </motion.div>
+            ))
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default HeroSection;
+
+
+
+import React, { useContext, useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { CartContext } from "../context/CartContext";
+import { UserContext } from "../context/UserContext";
+import { motion, AnimatePresence } from "framer-motion";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, FreeMode } from "swiper/modules";
+import {
+  Home,
+  ShoppingBag,
+  Plus,
+  Tag,
+  BarChart2,
+  Users,
+  Clock,
+  User,
+  LogIn,
+  LogOut,
+  Menu,
+  X,
+  Settings,
+  ShoppingCart
+} from "react-feather";
+import "../styles/Navbar.css";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/free-mode";
+import { BASE_URL } from "../config";
+
+const Navbar = () => {
+  const { cart } = useContext(CartContext);
+  const { userInfo, setUserInfo } = useContext(UserContext);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [activeLink, setActiveLink] = useState("");
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setActiveLink(location.pathname);
+  }, [location]);
+
+  const handleScroll = (e, id) => {
+    if (location.pathname === "/") {
+      e.preventDefault();
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
+
+  const handleLogout = () => {
+    fetch(`${BASE_URL}/auth/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => res.json())
+      .then(() => {
+        setUserInfo(null);
+        localStorage.removeItem("token");
+        navigate("/auth");
+      })
+      .catch((err) => console.error(err));
+  };
+
+  const userEmail = userInfo?.email || userInfo?.user?.email || "";
+  const userName = userInfo?.name || userEmail.split("@")[0] || "Guest";
+  const isAdmin = userEmail === "admin@example.com";
+
+  const navLinks = [
+    { path: "/", name: "Home", icon: Home, scrollId: "hero" },
+    { path: "/products", name: "Products", icon: ShoppingBag },
+    { path: "/cart", name: "Cart", icon: ShoppingCart },
+    { path: "/orderhistory", name: "History", icon: Clock }
+  ];
+
+  const adminLinks = [
+    { path: "/admin/add-product", name: "Add Product", icon: Plus },
+    { path: "/admin/add-coupon", name: "Coupons", icon: Tag },
+    { path: "/admin/dashboard", name: "Dashboard", icon: BarChart2 },
+    { path: "/admin/users", name: "Users", icon: Users },
+    { path: "/admin/hero-form", name: "Hero Banner", icon: Plus },
+    { path: "/admin/gallery-form", name: "Gallery", icon: Plus },
+    { path: "/admin/testimonial-form", name: "Testimonials", icon: Users }
+  ];
+
+  return (
+    <nav className="luxury-navbar">
+      <div className="navbar-container">
+
+        {/* Logo Section */}
+        <motion.div 
+          className="navbar-logo"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+        >
+          <Link to="/" className="logo-link">
+            <motion.span 
+              className="logo-text"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              whileHover={{
+                scale: 1.05,
+                textShadow: "0 0 12px rgba(219, 193, 172, 0.7)"
+              }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 400 }}
+            >
+              Swadhin
+            </motion.span>
+            <motion.div
+              className="logo-shimmer"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.4 }}
+              transition={{
+                repeat: Infinity,
+                repeatType: "reverse",
+                duration: 3,
+                ease: "easeInOut"
+              }}
+            />
+          </Link>
+        </motion.div>
+
+        {/* Desktop Navigation */}
+        <div className="desktop-nav">
+          <ul className="nav-links">
+            {navLinks.map((link) => (
+              <motion.li 
+                key={link.path} 
+                whileHover={{ y: -2 }}
+                className="nav-item"
+              >
+                <Link
+                  to={link.path}
+                  onClick={(e) => link.scrollId && handleScroll(e, link.scrollId)}
+                  className={`nav-link ${activeLink === link.path ? "active" : ""}`}
+                  aria-label={link.name}
+                >
+                  <link.icon size={18} className="nav-icon" />
+                  <span>{link.name}</span>
+                  {link.path === "/cart" && (
+                    <motion.span
+                      className="cart-badge"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      whileTap={{ scale: 0.8 }}
+                      transition={{ 
+                        type: "spring", 
+                        stiffness: 500,
+                        damping: 15
+                      }}
+                    >
+                      {cart.length}
+                    </motion.span>
+                  )}
+                </Link>
+                {activeLink === link.path && (
+                  <motion.div
+                    className="nav-underline"
+                    layoutId="navUnderline"
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 300, 
+                      damping: 25,
+                      mass: 0.5
+                    }}
+                  />
+                )}
+              </motion.li>
+            ))}
+
+            {isAdmin && (
+              <motion.li 
+                className="admin-menu"
+                whileHover={{ y: -2 }}
+              >
+                <motion.button
+                  className={`admin-toggle ${isAdminMenuOpen ? "active" : ""}`}
+                  onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  aria-label="Admin menu"
+                >
+                  <Settings size={18} className="nav-icon" />
+                  <span>Admin</span>
+                </motion.button>
+
+                <AnimatePresence>
+                  {isAdminMenuOpen && (
+                    <motion.div
+                      className="admin-dropdown"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {adminLinks.map((link, index) => (
+                        <motion.div
+                          key={link.path}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                        >
+                          <Link
+                            to={link.path}
+                            className="admin-link"
+                            onClick={() => setIsAdminMenuOpen(false)}
+                            aria-label={link.name}
+                          >
+                            <link.icon size={16} />
+                            <span>{link.name}</span>
+                          </Link>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.li>
+            )}
+          </ul>
+        </div>
+
+        {/* User Section */}
+        <div className="user-section">
+          {userEmail ? (
+            <motion.div
+              className="user-greeting"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <motion.div
+                className="user-badge"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                <User size={18} className="user-icon" />
+                <span className="user-name">Hi, {userName}</span>
+              </motion.div>
+              <motion.button
+                className="logout-btn"
+                onClick={handleLogout}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                aria-label="Logout"
+              >
+                <LogOut size={18} />
+              </motion.button>
+            </motion.div>
+          ) : (
+            <Link to="/auth" className="auth-link">
+              <LogIn size={18} />
+              <span>Login</span>
+            </Link>
+          )}
+        </div>
+
+        {/* Mobile Menu Button */}
+        <motion.button
+          className="mobile-menu-btn"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          aria-label="Menu"
+        >
+          {isMenuOpen ? (
+            <X size={24} className="menu-icon" />
+          ) : (
+            <Menu size={24} className="menu-icon" />
+          )}
+        </motion.button>
+
+        {/* Mobile Navigation */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              className="mobile-nav"
+              initial={{ opacity: 0, x: "100%" }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: "100%" }}
+              transition={{ 
+                type: "spring", 
+                damping: 25,
+                stiffness: 300
+              }}
+            >
+              <div className="mobile-nav-header">
+                <motion.div
+                  className="user-avatar"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <User size={24} />
+                </motion.div>
+                <motion.span
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                >
+                  {userName}
+                </motion.span>
+              </div>
+
+              <Swiper
+                modules={[Navigation, FreeMode]}
+                spaceBetween={16}
+                slidesPerView={3}
+                freeMode={true}
+                navigation
+                className="mobile-swiper-nav"
+              >
+                {navLinks.map((link, index) => (
+                  <SwiperSlide key={link.path}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 + index * 0.05 }}
+                    >
+                      <Link
+                        to={link.path}
+                        onClick={(e) => {
+                          link.scrollId && handleScroll(e, link.scrollId);
+                          setIsMenuOpen(false);
+                        }}
+                        className={`mobile-nav-link ${activeLink === link.path ? "active" : ""}`}
+                        aria-label={link.name}
+                      >
+                        <link.icon size={18} />
+                        <span>{link.name}</span>
+                        {link.path === "/cart" && (
+                          <motion.span
+                            className="mobile-cart-badge"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ 
+                              type: "spring", 
+                              stiffness: 500,
+                              delay: 0.3 + index * 0.05
+                            }}
+                          >
+                            {cart.length}
+                          </motion.span>
+                        )}
+                      </Link>
+                    </motion.div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+
+              {isAdmin && (
+                <div className="mobile-admin-section">
+                  <motion.h4
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    Admin Tools
+                  </motion.h4>
+                  <div className="mobile-admin-links">
+                    {adminLinks.map((link, index) => (
+                      <motion.div
+                        key={link.path}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.45 + index * 0.05 }}
+                      >
+                        <Link
+                          to={link.path}
+                          className="mobile-admin-link"
+                          onClick={() => setIsMenuOpen(false)}
+                          aria-label={link.name}
+                        >
+                          <link.icon size={16} />
+                          <span>{link.name}</span>
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="mobile-auth-section">
+                {userEmail ? (
+                  <motion.button
+                    className="mobile-logout-btn"
+                    onClick={() => {
+                      handleLogout();
+                      setIsMenuOpen(false);
+                    }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    aria-label="Logout"
+                  >
+                    <LogOut size={18} />
+                    <span>Logout</span>
+                  </motion.button>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                  >
+                    <Link
+                      to="/auth"
+                      className="mobile-login-btn"
+                      onClick={() => setIsMenuOpen(false)}
+                      aria-label="Login"
+                    >
+                      <LogIn size={18} />
+                      <span>Login / Signup</span>
+                    </Link>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;
+
+
+
+
+
+
+

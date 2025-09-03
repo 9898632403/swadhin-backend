@@ -1,0 +1,16 @@
+first git initialization , GitHub.com 
+
+git init
+git remote add origin https://github.com/9898632403/chetna.git
+git add .
+git commit -m "Initial commit - Chetna project"
+git branch -M main
+git push -u origin main
+
+
+
+
+favicon setup :- https://realfavicongenerator.net/
+
+https://www.xml-sitemaps.com/details-chetnadresses.com-49ed454b2.html sitemaptxt 
+
